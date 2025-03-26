@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+
 import {
   Terminal,
   User,
@@ -15,16 +16,12 @@ import {
 
 interface HeaderProps {
   activeSection: string;
-  darkMode: boolean;
   scrollToSection: (id: string) => void;
-  toggleDarkMode: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   activeSection,
-  darkMode,
   scrollToSection,
-  toggleDarkMode,
 }) => {
   const navItems = [
     { id: "home", icon: <Terminal className="w-5 h-5" />, label: "DEV/SM" },
@@ -68,18 +65,6 @@ export const Header: React.FC<HeaderProps> = ({
               </button>
             </li>
           ))}
-          <li>
-            <button
-              onClick={toggleDarkMode}
-              className="p-2 rounded-lg hover:bg-blue-600/20 transition-all"
-            >
-              {darkMode ? (
-                <Sun className="w-5 h-5" />
-              ) : (
-                <Moon className="w-5 h-5" />
-              )}
-            </button>
-          </li>
         </ul>
       </nav>
     </header>
