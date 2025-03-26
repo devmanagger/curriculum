@@ -1,22 +1,87 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { Header } from "@/components/Header";
+import { Router } from "next/router";
+import React, { useState, useEffect, useRef } from "react";
+import { useInView } from "react-intersection-observer";
+
+type Props = {
+  darkMode: boolean;
+  setDarkMode: React.Dispatch<React.SetStateAction<boolean>>;
+  activeSection: string;
+  setActiveSection: React.Dispatch<React.SetStateAction<string>>;
+};
+
+export default function Home(props: Props) {
+  const [darkMode, setDarkMode] = useState(false);
+  const [activeSection, setActiveSection] = useState("home");
+  const sections = [
+    "home",
+    "about",
+    "experience",
+    "skills",
+    "projects",
+    "education",
+    "contact",
+  ];
+
+  // Crear referencias para cada sección
+  const sectionRefs = useRef(
+    sections.reduce((acc, section) => {
+      acc[section] = useInView({ threshold: 0.5 });
+      return acc;
+    }, {} as Record<string, { ref: (node?: Element | null | undefined) => void; inView: boolean }>)
+  ).current;
+
+  // Asignar las referencias a los elementos correspondientes
+  useEffect(() => {
+    sections.forEach((section) => {
+      const element = document.getElementById(section);
+      if (element) {
+        sectionRefs[section].ref(element);
+      }
+    });
+  }, [sections, sectionRefs]);
+
+  // Actualizar activeSection cuando una sección entra en vista
+  useEffect(() => {
+    const visibleSection = sections.find(
+      (section) => sectionRefs[section].inView
+    );
+    if (visibleSection) {
+      setActiveSection(visibleSection);
+    }
+  }, [sections, sectionRefs]);
+
+  const scrollToSection = (id: string) => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
+      setActiveSection(id);
+    }
+  };
+
+  const toggleDarkMode = () => {
+    setDarkMode(!darkMode);
+    document.documentElement.classList.toggle("dark");
+  };
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-      </main>
-    </div>
+    <>
+      <div
+        className={`min-h-screen ${
+          darkMode ? "dark" : ""
+        } transition-colors duration-300`}
+      >
+        <div className="min-h-screen bg-gradient-to-b from-gray-100 via-gray-200 to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 text-gray-900 dark:text-gray-100">
+          <Header
+            activeSection={activeSection}
+            darkMode={darkMode}
+            scrollToSection={scrollToSection}
+            toggleDarkMode={toggleDarkMode}
+          />
+        </div>
+      </div>
+    </>
   );
 }
